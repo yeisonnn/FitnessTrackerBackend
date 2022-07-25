@@ -8,6 +8,8 @@ async function dropTables() {
   await client.query(`
   DROP TABLE IF EXISTS users;
   DROP TABLE IF EXISTS activities;
+  DROP TABLE IF EXISTS routines;
+  DROP TABLE IF EXISTS routines_activities;
   `);
 }
 
