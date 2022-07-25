@@ -12,7 +12,7 @@ async function createUser({ username, password }) {
       `INSERT INTO users(username, password)
       VALUES ($1, $2)
       ON CONFLICT (username) DO NOTHING 
-      RETURNING *;
+      RETURNING username;
       `,
       [username, password]
     );
@@ -37,7 +37,7 @@ async function getUser({ username, password }) {
       `,
       [username, password]
     );
-    if (!user) {
+    if (!user.password) {
       throw {
         name: "UserNotFoundError",
         message: "Username or Password is incorrect",
@@ -52,12 +52,12 @@ async function getUser({ username, password }) {
 async function getUserById(userId) {
   // eslint-disable-next-line no-useless-catch
   try {
-    const {
-      rows: [user],
-    } = await client.query(`
-      SELECT id, username
+    const user
+     = await client.query(`
+      SELECT id
       FROM users
       WHERE id=${userId}
+      RETURNING username
     `);
     return user;
   } catch (error) {
