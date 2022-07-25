@@ -1,18 +1,90 @@
+/* eslint-disable no-useless-catch */
 const client = require("./client");
 
 async function createRoutine({ creatorId, isPublic, name, goal }) {}
 
-async function getRoutineById(id) {}
+async function getRoutineById(id) {
+  try {
+    const {
+      rows: [routine],
+    } = await client.query(`
+      SELECT id, name
+      FROM routines
+      WHERE id=${id}
+    `);
 
-async function getRoutinesWithoutActivities() {}
+    if (!routine) {
+      return null;
+    }
 
-async function getAllRoutines() {}
+    return routine[0];
+  } catch (error) {
+    throw error;
+  }
+}
 
-async function getAllPublicRoutines() {}
+async function getRoutinesWithoutActivities() {
+  try {
+    const { rows: routines } = await client.query(`
+          SELECT *
+          FROM routines;
+        `);
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
 
-async function getAllRoutinesByUser({ username }) {}
+async function getAllRoutines() {
+  try {
+    const { rows: routines } = await client.query(`
+          SELECT *
+          FROM routines_activities;
+        `);
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
 
-async function getPublicRoutinesByUser({ username }) {}
+async function getAllPublicRoutines() {
+  try {
+    const { rows: routines } = await client.query(`
+          SELECT *
+          FROM routines
+          WHERE "isPublic" = true;
+        `);
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getAllRoutinesByUser({ username }) {
+  try {
+    const { rows: routines } = await client.query(`
+          SELECT *
+          FROM routines
+          WHERE username = ${username};
+        `);
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getPublicRoutinesByUser({ username }) {
+  try {
+    const { rows: routines } = await client.query(`
+          SELECT *
+          FROM routines
+          WHERE "creatorId" = ${username};
+        `);
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
 
 async function getPublicRoutinesByActivity({ id }) {}
 
