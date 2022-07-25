@@ -31,13 +31,13 @@ async function getUser({ username, password }) {
       rows: [user],
     } = await client.query(
       `
-        SELECT *
+        SELECT username
         FROM users
         WHERE username=$1 AND password=$2;
       `,
       [username, password]
     );
-    if (!user.password) {
+    if (!password) {
       throw {
         name: "UserNotFoundError",
         message: "Username or Password is incorrect",
@@ -52,14 +52,14 @@ async function getUser({ username, password }) {
 async function getUserById(userId) {
   // eslint-disable-next-line no-useless-catch
   try {
-    const user
-     = await client.query(`
+    const {
+      rows
+    } = await client.query(`
       SELECT id
       FROM users
-      WHERE id=${userId}
-      RETURNING username
+    WHERE id=${userId};
     `);
-    return user;
+    return rows[0];
   } catch (error) {
     throw error;
   }
