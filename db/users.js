@@ -4,6 +4,7 @@ const client = require("./client");
 
 // user functions
 async function createUser({ username, password }) {
+  // eslint-disable-next-line no-useless-catch
   try {
     const {
       rows: [user]
@@ -24,6 +25,7 @@ async function createUser({ username, password }) {
 // Return to add try/catch block
 
 async function getUser({ username, password }) {
+  // eslint-disable-next-line no-useless-catch
   try {
     const {
       rows: [user],
@@ -35,7 +37,12 @@ async function getUser({ username, password }) {
       `,
       [username, password]
     );
-
+    if (!user) {
+      throw {
+        name: "UserNotFoundError",
+        message: "Username or Password is incorrect",
+      };
+    }
     return user;
   } catch (error) {
     throw error;
@@ -43,6 +50,7 @@ async function getUser({ username, password }) {
 }
 
 async function getUserById(userId) {
+  // eslint-disable-next-line no-useless-catch
   try {
     const {
       rows: [user],
@@ -59,7 +67,23 @@ async function getUserById(userId) {
 }
 
 async function getUserByUsername(userName) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const {
+      rows: [user],
+    } = await client.query(
+      `
+        SELECT *
+        FROM users
+        WHERE username=$1;
+      `,
+      [userName]
+    );
 
+    return user;
+  } catch (error) {
+    throw error;
+  }
 }
 
 module.exports = {
