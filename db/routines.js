@@ -8,7 +8,7 @@ async function createRoutine({creatorId, isPublic, name, goal}) {
     } = await client.query(
       `INSERT INTO routines("creatorId", "isPublic", name, goal )
       VALUES ($1, $2, $3, $4)
-      RETURNING *;`,
+      RETURNING id, "creatorId", "isPublic", name, goal;`,
       [creatorId, isPublic, name, goal]
     );
     return routine;
