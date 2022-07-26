@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 const client = require('./client');
 
-async function createRoutine({ creatorId, isPublic, name, goal }) {
+async function createRoutine({creatorId, isPublic, name, goal}) {
   try {
     const {
       rows: [routine],
