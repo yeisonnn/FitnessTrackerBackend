@@ -97,12 +97,8 @@ async function destroyRoutineActivity(id) {
 }
 
 async function canEditRoutineActivity(routineActivityId, userId) {
-  if (userId !== "creatorId"){
-    return
-  }else {
-    
-  }
-  try {
+  
+    try {
     const {
       rows: [routineActivity],
     } = await client.query(
