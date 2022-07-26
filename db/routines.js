@@ -1,7 +1,21 @@
 /* eslint-disable no-useless-catch */
-const client = require("./client");
+const client = require('./client');
 
-async function createRoutine({ creatorId, isPublic, name, goal }) {}
+async function createRoutine({ creatorId, isPublic, name, goal }) {
+  try {
+    const {
+      rows: [routine],
+    } = await client.query(
+      `INSERT INTO routines("creatorId", "isPublic", name, goal )
+      VALUES ($1, $2, $3, $4);
+      `,
+      [creatorId, isPublic, name, goal]
+    );
+    return routine;
+  } catch (error) {
+    throw error;
+  }
+}
 
 async function getRoutineById(id) {
   try {
@@ -37,11 +51,11 @@ async function getRoutinesWithoutActivities() {
 
 async function getAllRoutines() {
   try {
-    const { rows: routines } = await client.query(`
+    const { rows } = await client.query(`
           SELECT *
-          FROM routines_activities;
+          FROM routines;
         `);
-    return routines;
+    return rows;
   } catch (error) {
     throw error;
   }

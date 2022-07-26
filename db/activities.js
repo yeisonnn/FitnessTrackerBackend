@@ -51,9 +51,8 @@ async function getActivityById(id) {
 async function getActivityByName(name) {
   try {
     const { rows } = await client.query(`
-    SELECT name 
-    FROM activities
-    WHERE name=${name};
+    SELECT id, name, description FROM activities
+    WHERE name = ${name};
   `);
     if (!rows.length) {
       return null;
@@ -66,6 +65,7 @@ async function getActivityByName(name) {
 
 async function attachActivitiesToRoutines(routines) {} //finish later
 
+// check this later
 async function updateActivity({ id, ...fields }) {
   // don't try to update the id
   // do update the name and description
@@ -77,17 +77,16 @@ async function updateActivity({ id, ...fields }) {
     .join(', ');
 
   try {
-    if (setString.length > 0) {
-      await client.query(
-        `
+    await client.query(
+      `
         UPDATE activities
-        SET ${setString}
+        SET name=${name}, description=${description}
         WHERE id=${id}
         RETURNING *;
       `,
-        [name, description]
-      );
-    }
+      [name, description]
+    );
+
     return await getActivityById(id); //Check later
   } catch (error) {
     throw error;
