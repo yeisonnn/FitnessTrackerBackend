@@ -59,9 +59,8 @@ async function getActivityByName(name) {
       rows: [activity],
     } = await client.query(`
     SELECT * FROM activities
-    WHERE name = ${name};
-  `);
-
+    WHERE name = $1;
+  `[name]);
     return activity;
   } catch (error) {
     throw error;
@@ -70,25 +69,23 @@ async function getActivityByName(name) {
 
 async function attachActivitiesToRoutines(routines) {} //finish later
 
-// check this later
-async function updateActivity({ id, name, description }) {
-  // don't try to update the id
-  // do update the name and description
-  // return the updated activity
 
+async function updateActivity({ ...fields }) {
+  const setString = Object.keys(fields)
+  .map((key, index) => `"${key}"=$${index + 1}`)
+  .join(", ");
   try {
     const {
       rows: [activity],
     } = await client.query(
       `
     UPDATE activities
-    SET name=$1, description=$2
-    WHERE id=$3
+    SET ${setString}
+    WHERE id=$1
     RETURNING *;
 `,
-      [name, description, id]
+Object.values(fields)
     );
-
     return activity;
   } catch (error) {
     throw error;

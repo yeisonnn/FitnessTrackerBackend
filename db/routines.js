@@ -36,7 +36,7 @@ async function getRoutineById(id) {
     throw error;
   }
 }
-
+// May have to return rows rather routines
 async function getRoutinesWithoutActivities() {
   try {
     const { rows: routines } = await client.query(`
