@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 const client = require('./client');
 
-async function createRoutine({creatorId, isPublic, name, goal}) {
+async function createRoutine({ creatorId, isPublic, name, goal }) {
   try {
     const {
       rows: [routine],
@@ -21,17 +21,16 @@ async function getRoutineById(id) {
   try {
     const {
       rows: [routine],
-    } = await client.query(`
+    } = await client.query(
+      `
       SELECT id, name
       FROM routines
-      WHERE id=${id}
-    `);
+      WHERE id=$1
+    `,
+      [id]
+    );
 
-    if (!routine) {
-      return null;
-    }
-
-    return routine[0];
+    return routine;
   } catch (error) {
     throw error;
   }
@@ -63,12 +62,11 @@ async function getAllRoutines() {
 
 async function getAllPublicRoutines() {
   try {
-    const { rows: routines } = await client.query(`
-          SELECT *
-          FROM routines
+    const { rows } = await client.query(`
+          SELECT * FROM routines
           WHERE "isPublic" = true;
         `);
-    return routines;
+    return rows;
   } catch (error) {
     throw error;
   }
@@ -89,18 +87,34 @@ async function getAllRoutinesByUser({ username }) {
 
 async function getPublicRoutinesByUser({ username }) {
   try {
-    const { rows: routines } = await client.query(`
-          SELECT *
-          FROM routines
-          WHERE "creatorId" = ${username};
-        `);
-    return routines;
+    const { rows } = await client.query(
+      `
+          SELECT * FROM routines
+          WHERE "isPublic" = true ;
+        `
+    );
+    console.log(rows, 'here in public');
+    return rows;
   } catch (error) {
     throw error;
   }
 }
 
-async function getPublicRoutinesByActivity({ id }) {}
+async function getPublicRoutinesByActivity({ id }) {
+  try {
+    const { rows } = await client.query(
+      `
+          SELECT id FROM routines_activities
+          WHERE id = $1;
+
+        `,
+      [id]
+    );
+    return rows;
+  } catch (error) {
+    throw error;
+  }
+}
 
 async function updateRoutine({ id, ...fields }) {}
 
