@@ -51,11 +51,16 @@ async function getUser({ username, password }) {
 async function getUserById(userId) {
   // eslint-disable-next-line no-useless-catch
   try {
-    const { rows: [user] } = await client.query(`
+    const {
+      rows: [user],
+    } = await client.query(
+      `
     SELECT id 
     FROM users
     WHERE id=$1;
-  `,[userId]);
+  `,
+      [userId]
+    );
     return user;
   } catch (error) {
     throw error;
