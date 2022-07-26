@@ -58,9 +58,10 @@ async function getActivityByName(name) {
     const {
       rows: [activity],
     } = await client.query(`
-    SELECT * FROM activities
-    WHERE name = $1;
-  `[name]);
+    SELECT *
+    FROM activities
+    WHERE name = $1;`
+    ,[name]);
     return activity;
   } catch (error) {
     throw error;
