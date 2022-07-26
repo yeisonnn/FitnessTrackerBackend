@@ -104,7 +104,7 @@ async function getPublicRoutinesByActivity({ id }) {
   try {
     const { rows } = await client.query(
       `
-          SELECT id FROM routines_activities
+          SELECT id FROM routine_activities
           WHERE id = $1;
 
         `,
