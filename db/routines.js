@@ -111,21 +111,58 @@ async function getPublicRoutinesByActivity({ id }) {
   try {
     const { rows } = await client.query(
       `
-          SELECT id FROM routine_activities
-          WHERE id = $1;
-
-        `,
-      [id]
+      SELECT routines.*
+      FROM routines 
+      JOIN routine_activities
+      ON routines.id=routine_activities."activityId"
+      WHERE routine_activities."activityId"=$1 AND routines."isPublic" = true;
+        `, [id]
     );
+    console.log(rows)
     return rows;
   } catch (error) {
     throw error;
   }
 }
 
-async function updateRoutine({ id, ...fields }) {}
+async function updateRoutine({ id, ...fields }) {
+  const setString = Object.keys(fields)
+    .map((key, index) => `"${key}"=$${index + 1}`)
+    .join(', ');
+  try {
+    const {
+      rows: [routines],
+    } = await client.query(
+      `
+    UPDATE routines
+    SET ${setString}
+    WHERE id=${id}
+    RETURNING *;
+`,
+      Object.values(fields)
+    );
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
 
-async function destroyRoutine(id) {}
+async function destroyRoutine(id) {
+  try {
+    const {
+      rows: [routines],
+    } = await client.query(
+      `
+      DELETE FROM routines
+      WHERE id = $1
+      RETURNING *
+      ;`,[id]
+    );
+    return routines;
+  } catch (error) {
+    throw error;
+  }
+}
 
 module.exports = {
   getRoutineById,
