@@ -104,9 +104,10 @@ async function canEditRoutineActivity(routineActivityId, userId) {
     } = await client.query(
       `
       SELECT * FROM routine_activities
-      WHERE id = ${routineActivityId}
+      WHERE id = ${routineActivityId} AND "routineId" = ${userId}
       ;`
     );
+    console.log(routineActivity)
 
     return routineActivity;
   } catch (error) {

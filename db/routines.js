@@ -109,17 +109,16 @@ async function getPublicRoutinesByUser({ username }) {
 
 async function getPublicRoutinesByActivity({ id }) {
   try {
-    const { rows } = await client.query(
+    const { rows: routines } = await client.query(
       `
-      SELECT routines.*
+      SELECT routines.*, users.username AS "creatorName"
       FROM routines 
-      JOIN routine_activities
-      ON routines.id=routine_activities."activityId"
+      JOIN routine_activities ON routines_activities."routineId" = routine.id
+      JOIN users ON routines."creatorId" = users.id
       WHERE routine_activities."activityId"=$1 AND routines."isPublic" = true;
         `, [id]
     );
-    console.log(rows)
-    return rows;
+    return attachActivitiesToRoutines(routines);
   } catch (error) {
     throw error;
   }
@@ -148,22 +147,19 @@ async function updateRoutine({ id, ...fields }) {
 }
 
 async function destroyRoutine(id) {
-  try {
-    const {
-      rows: [routines],
-    } = await client.query(
+  await client.query(
+      `
+      DELETE FROM routine_activities
+      WHERE "routineId" = $1;
+      `, [id]
+    )
+  await client.query(
       `
       DELETE FROM routines
-      WHERE id = $1
-      RETURNING *
-      ;`,[id]
-    );
-    return routines;
-  } catch (error) {
-    throw error;
-  }
-}
-
+      WHERE id = $1;`, [id]
+    )
+    
+    }
 module.exports = {
   getRoutineById,
   getRoutinesWithoutActivities,
