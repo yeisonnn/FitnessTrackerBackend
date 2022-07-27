@@ -116,11 +116,10 @@ async function getPublicRoutinesByActivity({ id }) {
   try {
     const { rows: routines } = await client.query(
       `
-      SELECT routines.*, users.username AS "creatorName"
-      FROM routines 
-      JOIN routine_activities ON routines_activities."routineId" = routine.id
-      JOIN users ON routines."creatorId" = users.id
-      WHERE routine_activities."activityId"=$1 AND routines."isPublic" = true;
+      SELECT routines.*, routine_activities."activityId", users.username AS "creatorName" FROM routines
+      INNER JOIN routine_activities ON routines.id = routine_activities."routineId"
+      INNER JOIN users ON routines."creatorId" = users.id
+      WHERE routines."isPublic" = true AND routine_activities."activityId" = $1;
         `,
       [id]
     );
