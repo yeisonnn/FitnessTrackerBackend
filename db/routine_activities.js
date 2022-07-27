@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-catch */
 const client = require('./client');
+const { attachActivitiesToRoutines } = require('./activities');
 
 async function addActivityToRoutine({
   routineId,
@@ -104,7 +105,8 @@ async function canEditRoutineActivity(routineActivityId, userId) {
     } = await client.query(
       `
       SELECT * FROM routine_activities
-      WHERE id = ${routineActivityId} AND "routineId" = ${userId}
+      INNER JOIN routines ON routine_activities."routineId" = routines.id
+      WHERE routine_activities."activityId" = ${routineActivityId} AND routines."creatorId" = ${userId}
       ;`
     );
     console.log(routineActivity)
