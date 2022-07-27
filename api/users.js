@@ -6,6 +6,12 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 const { getUserByUsername, createUser } = require('../db/users');
 
+router.use((req, res, next) => {
+  console.log('A request is being made to /users');
+
+  next();
+});
+
 // POST /api/users/register
 router.post('/register', async (req, res, next) => {
   const { username, password } = req.body;
@@ -13,18 +19,22 @@ router.post('/register', async (req, res, next) => {
   try {
     const _user = await getUserByUsername(username);
 
-    if (_user) {
-      next({
-        name: 'UserExistsError',
-        message: 'A user by that username already exists',
-      });
-    }
-
     if (password.length < 8) {
       next({
         name: 'PasswordError',
-        message: 'The password must be at least 8 char long',
+        message: 'Password Too Short!',
+        error: 'wrong password',
       });
+      return;
+    }
+
+    if (_user) {
+      next({
+        name: 'UserExistsError',
+        message: `User ${username} is already taken.`,
+        error: 'choose another user',
+      });
+      return;
     }
 
     const user = await createUser({
@@ -46,14 +56,14 @@ router.post('/register', async (req, res, next) => {
     res.send({
       message: 'thank you for signing up',
       token,
+      user: {
+        id: user.id,
+        username,
+      },
     });
   } catch ({ name, message }) {
     next({ name, message });
   }
-});
-
-router.get('/', async (req, res) => {
-  res.send('hello from users');
 });
 
 // POST /api/users/login
@@ -63,3 +73,57 @@ router.get('/', async (req, res) => {
 // GET /api/users/:username/routines
 
 module.exports = router;
+
+/*
+ router.post('/register', async (req, res, next) => {
+  const { username, password } = req.body;
+
+  try {
+    const _user = await getUserByUsername(username);
+
+    if (password.length < 8) {
+      next({
+        name: 'PasswordError',
+        message: 'The password must be at least 8 char long',
+      });
+    }
+
+    if (_user) {
+      next({
+        name: 'UserExistsError',
+        message: 'A user by that username already exists',
+      });
+    }
+
+    const user = await createUser({
+      username,
+      password,
+    });
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: '1w',
+      }
+    );
+
+    console.log('here in register', user);
+
+    res.send({
+      message: 'thank you for signing up',
+      token,
+      user: {
+        id: user.id,
+        username,
+      },
+    });
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
+
+ */
