@@ -23,13 +23,11 @@ async function getRoutineById(id) {
       rows: [routine],
     } = await client.query(
       `
-      SELECT id, name
-      FROM routines
+      SELECT * FROM routines
       WHERE id=$1
     `,
       [id]
     );
-
     return routine;
   } catch (error) {
     throw error;
@@ -38,11 +36,12 @@ async function getRoutineById(id) {
 // May have to return rows rather routines
 async function getRoutinesWithoutActivities() {
   try {
-    const { rows: routines } = await client.query(`
+    const { rows } = await client.query(`
           SELECT *
-          FROM routines;
+          FROM routines
+          RETURNING *;
         `);
-    return routines;
+    return rows;
   } catch (error) {
     throw error;
   }
@@ -51,9 +50,11 @@ async function getRoutinesWithoutActivities() {
 async function getAllRoutines() {
   try {
     const { rows } = await client.query(`
-          SELECT *
-          FROM routines;
-        `);
+    SELECT routines.*, users.username AS "creatorName"
+    FROM routines
+    INNER JOIN users ON routines."creatorId" = users.id;
+    `);
+
     return rows;
   } catch (error) {
     throw error;
@@ -63,8 +64,9 @@ async function getAllRoutines() {
 async function getAllPublicRoutines() {
   try {
     const { rows } = await client.query(`
-          SELECT * FROM routines
-          WHERE "isPublic" = true;
+    SELECT users.username AS "creatorName", routines.* FROM users
+    INNER JOIN routines ON users.id = routines."creatorId"
+    WHERE routines."isPublic" = true;
         `);
     return rows;
   } catch (error) {
@@ -89,11 +91,15 @@ async function getPublicRoutinesByUser({ username }) {
   try {
     const { rows } = await client.query(
       `
-          SELECT * FROM routines
-          WHERE "isPublic" = true ;
-        `
+      SELECT routines.*, users.username AS "creatorName"
+      FROM routines 
+      INNER JOIN users
+      ON routines."creatorId"=users.id
+      WHERE users.username=$1;
+        `,
+      [username]
     );
-    console.log(rows, 'here in public');
+
     return rows;
   } catch (error) {
     throw error;
