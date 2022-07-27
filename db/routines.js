@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-catch */
 const client = require('./client');
+const {attachActivitiesToRoutines}= require('./activities')
 
 async function createRoutine({ creatorId, isPublic, name, goal }) {
   try {
@@ -55,7 +56,7 @@ async function getAllRoutines() {
     INNER JOIN users ON routines."creatorId" = users.id;
     `);
 
-    return rows;
+    return attachActivitiesToRoutines(rows);
   } catch (error) {
     throw error;
   }
@@ -68,7 +69,7 @@ async function getAllPublicRoutines() {
     INNER JOIN routines ON users.id = routines."creatorId"
     WHERE routines."isPublic" = true;
         `);
-    return rows;
+        return attachActivitiesToRoutines(rows);
   } catch (error) {
     throw error;
   }
@@ -81,7 +82,7 @@ async function getAllRoutinesByUser({ username }) {
           FROM routines
           WHERE username = ${username};
         `);
-    return routines;
+        return attachActivitiesToRoutines(routines);
   } catch (error) {
     throw error;
   }
@@ -95,12 +96,12 @@ async function getPublicRoutinesByUser({ username }) {
       FROM routines 
       INNER JOIN users
       ON routines."creatorId"=users.id
-      WHERE users.username=$1;
+      WHERE users.username=$1 AND routines."isPublic" = true;
         `,
       [username]
     );
 
-    return rows;
+    return attachActivitiesToRoutines(rows);
   } catch (error) {
     throw error;
   }
