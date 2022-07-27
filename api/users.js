@@ -108,6 +108,11 @@ router.post('/login', async (req, res, next) => {
 });
 
 // GET /api/users/me
+router.get('/me', async (req, res, next) => {
+  res.json({
+    message: 'me',
+  });
+});
 
 // GET /api/users/:username/routines
 
