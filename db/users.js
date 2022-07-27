@@ -1,9 +1,12 @@
 const client = require('./client');
+const bcrypt = require('bcrypt');
 
 // database functions
 
 // user functions
 async function createUser({ username, password }) {
+  const SALT_COUNT = 10;
+  const hashedPassword = await bcrypt.hash(password, SALT_COUNT);
   // eslint-disable-next-line no-useless-catch
   try {
     const {
@@ -24,27 +27,13 @@ async function createUser({ username, password }) {
 // Return to add try/catch block
 
 async function getUser({ username, password }) {
-  // eslint-disable-next-line no-useless-catch
-  try {
-    const {
-      rows: [user],
-    } = await client.query(
-      `
-        SELECT username
-        FROM users
-        WHERE username=$1 AND password=$2;
-      `,
-      [username, password]
-    );
-    if (!password) {
-      throw {
-        name: 'UserNotFoundError',
-        message: 'Username or Password is incorrect',
-      };
-    }
-    return user;
-  } catch (error) {
-    throw error;
+  const user = await getUserByUsername(username);
+  const hashedPassword = user.password;
+  const passwordsMatch = await bcrypt.compare(password, hashedPassword);
+  if (passwordsMatch){ 
+    return user.username
+  } else {
+    catch error;
   }
 }
 
