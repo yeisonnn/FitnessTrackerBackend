@@ -1,19 +1,12 @@
 const express = require('express');
-const cors = require('cors')
 const router = express.Router();
-const app = express()
-
-app.use(cors())
 
 // GET /api/health
-router.get('/health', cors(), async (req, res, next) => {
-res.send(
-    "All is well"
-    
-)
+router.get('/health', async (req, res, next) => {
+  res.json({
+    message: 'All is Well',
+  });
 });
-
-
 
 const usersRouter = require('./users');
 router.use('/users', usersRouter);
