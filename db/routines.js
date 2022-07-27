@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 const client = require('./client');
-const {attachActivitiesToRoutines}= require('./activities')
+const { attachActivitiesToRoutines } = require('./activities');
 
 async function createRoutine({ creatorId, isPublic, name, goal }) {
   try {
@@ -69,7 +69,7 @@ async function getAllPublicRoutines() {
     INNER JOIN routines ON users.id = routines."creatorId"
     WHERE routines."isPublic" = true;
         `);
-        return attachActivitiesToRoutines(rows);
+    return attachActivitiesToRoutines(rows);
   } catch (error) {
     throw error;
   }
@@ -77,12 +77,17 @@ async function getAllPublicRoutines() {
 
 async function getAllRoutinesByUser({ username }) {
   try {
-    const { rows: routines } = await client.query(`
-          SELECT *
-          FROM routines
-          WHERE username = ${username};
-        `);
-        return attachActivitiesToRoutines(routines);
+    const { rows: routines } = await client.query(
+      `
+    SELECT routines.*, users.username AS "creatorName"
+    FROM routines 
+    INNER JOIN users
+    ON routines."creatorId"=users.id
+    WHERE users.username=$1;
+        `,
+      [username]
+    );
+    return attachActivitiesToRoutines(routines);
   } catch (error) {
     throw error;
   }
@@ -116,7 +121,8 @@ async function getPublicRoutinesByActivity({ id }) {
       JOIN routine_activities ON routines_activities."routineId" = routine.id
       JOIN users ON routines."creatorId" = users.id
       WHERE routine_activities."activityId"=$1 AND routines."isPublic" = true;
-        `, [id]
+        `,
+      [id]
     );
     return attachActivitiesToRoutines(routines);
   } catch (error) {
@@ -148,18 +154,19 @@ async function updateRoutine({ id, ...fields }) {
 
 async function destroyRoutine(id) {
   await client.query(
-      `
+    `
       DELETE FROM routine_activities
       WHERE "routineId" = $1;
-      `, [id]
-    )
+      `,
+    [id]
+  );
   await client.query(
-      `
+    `
       DELETE FROM routines
-      WHERE id = $1;`, [id]
-    )
-    
-    }
+      WHERE id = $1;`,
+    [id]
+  );
+}
 module.exports = {
   getRoutineById,
   getRoutinesWithoutActivities,
