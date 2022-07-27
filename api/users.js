@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { getAllRoutinesByUser, getPublicRoutinesByActivity, getPublicRoutinesByUser } = require('../db');
 const { JWT_SECRET } = process.env;
 const { getUserByUsername, createUser } = require('../db/users');
 
@@ -79,9 +80,6 @@ router.post('/login', async (req, res, next) => {
 
   try {
     const user = await getUserByUsername(username);
-
-    console.log('user:', user);
-
     if (user.username == username) {
       const token = jwt.sign(
         { id: user.id, username: user.username },
@@ -116,58 +114,17 @@ router.get('/me', async (req, res, next) => {
 
 // GET /api/users/:username/routines
 
+router.get(`/:username/routines`, async (req, res, next) => {
+  try{
+  const { username }= req.params
+  const routines = await getAllRoutinesByUser({username})
+  const publicRoutines = await getPublicRoutinesByUser({username})
+  res.send(routines)
+
+} catch(error){
+  throw error;
+}
+})
+
+
 module.exports = router;
-
-/*
- router.post('/register', async (req, res, next) => {
-  const { username, password } = req.body;
-
-  try {
-    const _user = await getUserByUsername(username);
-
-    if (password.length < 8) {
-      next({
-        name: 'PasswordError',
-        message: 'The password must be at least 8 char long',
-      });
-    }
-
-    if (_user) {
-      next({
-        name: 'UserExistsError',
-        message: 'A user by that username already exists',
-      });
-    }
-
-    const user = await createUser({
-      username,
-      password,
-    });
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        username,
-      },
-      JWT_SECRET,
-      {
-        expiresIn: '1w',
-      }
-    );
-
-    console.log('here in register', user);
-
-    res.send({
-      message: 'thank you for signing up',
-      token,
-      user: {
-        id: user.id,
-        username,
-      },
-    });
-  } catch ({ name, message }) {
-    next({ name, message });
-  }
-});
-
- */
