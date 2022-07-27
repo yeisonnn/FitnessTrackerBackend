@@ -1,11 +1,14 @@
 /* eslint-disable no-useless-catch */
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = process.env;
+const { getUserByUsername, createUser } = require('../db/users');
 
 // POST /api/users/register
-
 router.post('/register', async (req, res, next) => {
-  const { username, password, name, location } = req.body;
+  const { username, password } = req.body;
 
   try {
     const _user = await getUserByUsername(username);
@@ -17,11 +20,16 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
+    if (password.length < 8) {
+      next({
+        name: 'PasswordError',
+        message: 'The password must be at least 8 char long',
+      });
+    }
+
     const user = await createUser({
       username,
       password,
-      name,
-      location,
     });
 
     const token = jwt.sign(
@@ -42,6 +50,10 @@ router.post('/register', async (req, res, next) => {
   } catch ({ name, message }) {
     next({ name, message });
   }
+});
+
+router.get('/', async (req, res) => {
+  res.send('hello from users');
 });
 
 // POST /api/users/login
