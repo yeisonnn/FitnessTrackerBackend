@@ -24,8 +24,6 @@ const username = req.user.username
           }
 
         const updatedRoutineActivity = await updateRoutineActivity({ id, routineId, activityId, count, duration })
-        const count = updatedRoutineActivity.count
-        const duration = updatedRoutineActivity.duration
         res.send({count, duration})
 
     } catch ({name, message}){
