@@ -7,6 +7,7 @@ const {
   getActivityById,
   updateActivity,
 } = require('../db/activities');
+const { requireUser } = require("./utils");
 // GET /api/activities/:activityId/routines
 
 // GET /api/activities
@@ -40,7 +41,7 @@ router.post('/', async (req, res, next) => {
     const activity = await createActivity({ name, description });
 
     if (activity) {
-      req.send(activity);
+      res.send(activity);
     }
   } catch ({ name, message }) {
     next({ name, message });
@@ -50,7 +51,7 @@ router.post('/', async (req, res, next) => {
 // PATCH /api/activities/:activityId
 
 router.patch('/:activityId', async (req, res, next) => {
-  const id = Number(req.params.activityId);
+  const id = req.params.activityId;
   const { name, description } = req.body;
   try {
     const activity = await getActivityById(id);
@@ -58,19 +59,31 @@ router.patch('/:activityId', async (req, res, next) => {
     if (!activity) {
       next({
         name: 'ActivityExistsError',
-        message: `An activity does not exists`,
+        message: `Activity ${id} not found`,
         error: 'choose another activity',
       });
       return;
     }
-    const upadateActivity = updateActivity({ id, name, description });
 
-    if (upadateActivity) {
-      res.send(upadateActivity);
+    const activityName = await getActivityByName(name);
+    if (activityName){
+      next ({
+        name: 'ActivityNameError',
+        message: `An activity with name ${name} already exists`,
+        error: "Rename activity name"
+      })
     }
+    const patchActivity = await updateActivity({ id, name, description });
+
+    if (patchActivity) {
+      res.send(patchActivity);
+    }
+
+    console.log('updateActivity::::::', patchActivity);
   } catch ({ name, message }) {
     next({ name, message });
   }
 });
+
 
 module.exports = router;
