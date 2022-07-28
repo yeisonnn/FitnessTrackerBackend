@@ -2,7 +2,6 @@ function requireUser(req, res, next) {
     if (!req.user) {
         res.status (401)
       next({
-        error: "Invalid token",
         name: "MissingUserError",
         message: "You must be logged in to perform this action",
       });

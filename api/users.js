@@ -117,55 +117,26 @@ router.get('/me', requireUser,  async (req, res, next) => {
   } catch (error){
     next (error)
   }
-  // const prefix = 'Bearer ';
-  // const auth = req.header('Authorization');
-
-  // if (!auth) {
-  //   next();
-  // } else if (auth.startsWith(prefix)) {
-  //   const token = auth.slice(prefix.length);
-
-  //   try {
-  //     const { id } = jwt.verify(token, JWT_SECRET);
-  //     if (!id) {
-  //       next({
-  //         name: 'Invalid token',
-  //         message: 'This is an invalid token',
-  //       });
-  //     }
-  //     if (id) {
-  //       req.user = await getUserById(id);
-  //       res.send(req.user);
-  //     }
-  //   } catch ({ name, message }) {
-  //     next({ name, message });
-  //   }
-  // } else {
-  //   next({
-  //     name: 'AuthorizationHeaderError',
-  //     message: `Authorization token must start with ${prefix}`,
-  //   });
-  // }
 });
 
 // GET /api/users/:username/routines
 
-router.get(`/:username/routines`, async (req, res, next) => {
+router.get("/:username/routines", async (req, res, next) => {
   try {
-    const { username } = req.params;
+    const {username} = req.params;
     const user = await getUserByUsername(username);
     if (!user) {
       next({
-        name: 'User does not exist in the database',
-        message: 'User does not exist in the database',
+        name: "No user found",
+        message: "User does not exist in the database",
       });
     }
     if (req.user && user.id === req.user.id) {
-      const publicRoutines = await getPublicRoutinesByUser({ username });
-      res.send(publicRoutines);
-    }
-      const routines = await getAllRoutinesByUser({ username });
+      const routines = await getAllRoutinesByUser({ username: username });
       res.send(routines);
+    }
+      const publicRoutines = await getPublicRoutinesByUser({ username: username });
+      res.send(publicRoutines);
   } catch (error) {
     next(error);
   }
