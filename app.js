@@ -1,21 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const morgan = require("morgan");
+const client = require("./db/client");
+const cors = require('cors');
+
+client.connect();
+app.use(express.json());
+app.use(morgan("dev"));
+app.use(cors());
 
 const apiRouter = require('./api');
 app.use('/api', apiRouter);
-
-const cors = require('cors');
-app.use(cors());
-
-const morgan = require("morgan");
-app.use(morgan("dev"));
-
-const client = require("./db/client");
-client.connect();
-
-app.use(express.json());
-
 
 // Setup your Middleware and API Router here
 app.use((error, req, res, next) => {
@@ -25,6 +21,6 @@ app.use((error, req, res, next) => {
       error: error.message
     });
   });
-
+  
 
 module.exports = app;

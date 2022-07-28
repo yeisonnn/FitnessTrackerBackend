@@ -10,7 +10,7 @@ const {
 } = require('../db');
 const { JWT_SECRET } = process.env;
 const { getUserByUsername, createUser } = require('../db/users');
-const { requireUser } = require("../utils");
+const { requireUser } = require("./utils");
 
 router.use((req, res, next) => {
   console.log('A request is being made to /users');
@@ -25,23 +25,20 @@ router.post('/register', async (req, res, next) => {
   try {
     const _user = await getUserByUsername(username);
 
-    if (password.length < 8) {
-      next({
-        name: 'PasswordError',
-        message: 'Password Too Short!',
-        error: 'wrong password',
-      });
-      return;
-    }
-
     if (_user) {
       next({
         name: 'UserExistsError',
-        message: `User ${username} is already taken.`,
-        error: 'choose another user',
+        message: `User ${username} is already taken.`
       });
-      return;
     }
+    if (password.length < 8) {
+      next({
+        name: 'PasswordError',
+        message: 'Password Too Short!'
+      });
+    }
+
+    
 
     const user = await createUser({
       username,
@@ -53,7 +50,7 @@ router.post('/register', async (req, res, next) => {
         id: user.id,
         username,
       },
-      JWT_SECRET,
+      process.env.JWT_SECRET,
       {
         expiresIn: '1w',
       }
@@ -62,10 +59,7 @@ router.post('/register', async (req, res, next) => {
     res.send({
       message: 'thank you for signing up',
       token,
-      user: {
-        id: user.id,
-        username,
-      },
+      user
     });
   } catch ({ name, message }) {
     next({ name, message });

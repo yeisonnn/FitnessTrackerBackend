@@ -2,14 +2,10 @@ const express = require('express');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
-const {getUserById} = require("../db");
+const {getUserById} = require("../db/users");
 
 // GET /api/health
-router.get('/health', async (req, res, next) => {
-  res.json({
-    message: 'All is Well',
-  });
-});
+
 
 router.use(async (req, res, next) => {
   const prefix = "Bearer ";
@@ -46,6 +42,11 @@ router.use((req, res, next) => {
   next();
 });
 
+router.get('/health', async (req, res, next) => {
+  res.json({
+    message: 'All is Well',
+  });
+});
 const usersRouter = require('./users');
 router.use('/users', usersRouter);
 const activitiesRouter = require('./activities');
