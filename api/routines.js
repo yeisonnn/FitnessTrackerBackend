@@ -42,8 +42,8 @@ router.patch('/:routineId', requireUser, async (req, res, next) => {
   const {isPublic, name, goal } = req.body;
   const routine = await getRoutineById(req.params.routineId);
   const { creatorId } = routine.creatorId;
+  const id = routine.id
   const username = req.user.username
-  const id = req.user.id
 
   try {
     
