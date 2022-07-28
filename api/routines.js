@@ -81,10 +81,6 @@ router.delete('/:routineId', requireUser, async (req, res, next)=> {
   const id = routine.id;
   const username = req.user.username
 
-
-
-
-
   try {
 
     if (routine.creatorId != req.user.id){
