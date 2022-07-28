@@ -109,7 +109,6 @@ async function canEditRoutineActivity(routineActivityId, userId) {
       WHERE routine_activities."activityId" = ${routineActivityId} AND routines."creatorId" = ${userId}
       ;`
     );
-    console.log(routineActivity)
 
     return routineActivity;
   } catch (error) {

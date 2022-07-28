@@ -76,7 +76,7 @@ router.get('/:routineId', async (req, res, next) => {
 });
 
 // DELETE /api/routines/:routineId
-router.delete('/:routineId', async (req, res, next)=> {
+router.delete('/:routineId', requireUser, async (req, res, next)=> {
   const routine = await getRoutineById(req.params.routineId);
   const id = routine.id;
   const username = req.user.username
@@ -97,15 +97,16 @@ router.delete('/:routineId', async (req, res, next)=> {
     }
     if (id){
       const removeRoutine = await destroyRoutine(id)
-      console.log (removeRoutine)
-      res.send(removeRoutine)
+      res.send(routine)
     }
 
   } catch ({ name, message }) {
     next({ name, message });
   }
 });
-// "creatorId": 7, "goal": "Until I fit into those pants", "id": 6, "isPublic": true, "name": "On Thursdays"}
 // POST /api/routines/:routineId/activities
+router.post('/:routineId/activities', requireUser, async (req, res, next)=> {
+
+})
 
 module.exports = router;
