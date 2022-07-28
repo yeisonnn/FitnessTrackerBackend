@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getAllRoutines, createRoutine } = require('../db/routines');
+const {
+  getAllRoutines,
+  createRoutine,
+  updateRoutine,
+  getRoutineById,
+} = require('../db/routines');
 const { requireUser } = require('./utils');
 
 // GET /api/routines
@@ -17,14 +22,13 @@ router.get('/', async (req, res, next) => {
 
 // POST /api/routines
 router.post('/', requireUser, async (req, res, next) => {
-  const { creatorId, isPublic, name, goal } = req.body;
-  const id = req.user.id;
+  const { isPublic, name, goal } = req.body;
 
   try {
-    if (id === creatorId) {
+    const creatorId = await req.user.id;
+    if (creatorId) {
       const routine = await createRoutine({ creatorId, isPublic, name, goal });
       res.send(routine);
-      return;
     }
   } catch ({ name, message }) {
     next({ name, message });
@@ -32,6 +36,36 @@ router.post('/', requireUser, async (req, res, next) => {
 });
 
 // PATCH /api/routines/:routineId
+router.patch('/:routineId', requireUser, async (req, res, next) => {
+  const id = req.params.routineId;
+  const { userId } = req.user;
+  const { isPublic, name, goal } = req.body;
+
+  try {
+    const routineId = await getRoutineById(id);
+    const { creatorId } = routineId;
+
+    if (creatorId !== userId) {
+      next({
+        name: 'RoutineDoesNotExist',
+        message: `this routine is not yours`,
+        error: "This routine doesn't exist",
+      });
+    }
+    const patchRoutine = await updateRoutine({
+      userId,
+      isPublic,
+      name,
+      goal,
+    });
+
+    if (patchRoutine) {
+      res.send(patchRoutine);
+    }
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
 
 // DELETE /api/routines/:routineId
 
