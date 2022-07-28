@@ -5,6 +5,7 @@ const {
   createRoutine,
   updateRoutine,
   getRoutineById,
+  destroyRoutine,
 } = require('../db/routines');
 const { getUserById } = require('../db/users');
 const { UserDoesNotExistError } = require('../errors');
@@ -75,7 +76,36 @@ router.get('/:routineId', async (req, res, next) => {
 });
 
 // DELETE /api/routines/:routineId
+router.delete('/:routineId', async (req, res, next)=> {
+  const routine = await getRoutineById(req.params.routineId);
+  const id = routine.id;
+  const username = req.user.username
 
+
+
+
+
+  try {
+
+    if (routine.creatorId != req.user.id){
+      res.status(403)
+          next({
+          name: "You are not the Owner",
+          message: `User ${username} is not allowed to delete ${routine.name}`,
+          error: "There was an error",
+        })
+    }
+    if (id){
+      const removeRoutine = await destroyRoutine(id)
+      console.log (removeRoutine)
+      res.send(removeRoutine)
+    }
+
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
+// "creatorId": 7, "goal": "Until I fit into those pants", "id": 6, "isPublic": true, "name": "On Thursdays"}
 // POST /api/routines/:routineId/activities
 
 module.exports = router;
