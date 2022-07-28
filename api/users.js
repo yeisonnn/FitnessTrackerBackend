@@ -12,12 +12,6 @@ const { JWT_SECRET } = process.env;
 const { getUserByUsername, createUser } = require('../db/users');
 const { requireUser } = require("./utils");
 
-router.use((req, res, next) => {
-  console.log('A request is being made to /users');
-
-  next();
-});
-
 // POST /api/users/register
 router.post('/register', async (req, res, next) => {
   const { username, password } = req.body;
