@@ -26,7 +26,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // POST /api/activities
-router.post('/', async (req, res, next) => {
+router.post('/', requireUser, async (req, res, next) => {
   const { name, description } = req.body;
 
   try {
@@ -52,7 +52,7 @@ router.post('/', async (req, res, next) => {
 
 // PATCH /api/activities/:activityId
 
-router.patch('/:activityId', async (req, res, next) => {
+router.patch('/:activityId', requireUser, async (req, res, next) => {
   const id = req.params.activityId;
   const { name, description } = req.body;
   try {
@@ -89,20 +89,23 @@ router.get('/:activityId/routines', async (req, res, next) => {
     const routines = await getPublicRoutinesByActivity({id});
     const activity = await getActivityById(id);
     
-    if(true){
+    if(!activity){
       next({
         name: "RoutineDoesNotExist",
         message: `Activity ${id} not found`,
         error: "This routine doesn't exist"
-      })
+      });
+      return
+ 
     }
-    res.send(routines)
+    if (routines){
+      res.send(routines)
+    }
+    
 
   } catch ({ name, message }){
     next ({ name, message })
   }
-
-
 })
 
 
