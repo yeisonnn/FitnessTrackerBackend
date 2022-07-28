@@ -7,6 +7,7 @@ const {
   getRoutineById,
 } = require('../db/routines');
 const { getUserById } = require('../db/users');
+const { UserDoesNotExistError } = require('../errors');
 const { requireUser } = require('./utils');
 
 // GET /api/routines
@@ -38,30 +39,25 @@ router.post('/', requireUser, async (req, res, next) => {
 
 // PATCH /api/routines/:routineId
 router.patch('/:routineId', requireUser, async (req, res, next) => {
-  const { isPublic, name, goal } = req.body;
-  const userId = await req.user.id;
+  const {isPublic, name, goal } = req.body;
+  const routine = await getRoutineById(req.params.routineId);
+  const { creatorId } = routine.creatorId;
+  const username = req.user.username
+  const id = req.user.id
 
   try {
-    const routine = await getRoutineById(req.params.routineId);
-    const { creatorId } = routine;
-    const routineName = routine.name;
-    const username = await getUserById(req.user.id);
-    console.log(userId);
-
-    if (creatorId !== req.user.id) {
-      res.status(403);
-      return;
-    }
-    const patchRoutine = await updateRoutine({
-      userId,
-      isPublic,
-      name,
-      goal,
-    });
-
-    if (patchRoutine) {
-      res.send(patchRoutine);
-    }
+    
+    if (routine.creatorId != req.user.id) {
+        res.status(403)
+          next({
+          name: "You are not the Owner",
+          message: `User ${username} is not allowed to update ${routine.name}`,
+          error: "There was an error",
+        })
+    } 
+    const patchRoutine = await updateRoutine({id, creatorId, isPublic, name, goal});
+    
+    res.send(patchRoutine)
   } catch ({ name, message }) {
     next({ name, message });
   }
