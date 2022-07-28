@@ -10,6 +10,7 @@ const {
 } = require('../db');
 const { JWT_SECRET } = process.env;
 const { getUserByUsername, createUser } = require('../db/users');
+const { requireUser } = require("../utils");
 
 router.use((req, res, next) => {
   console.log('A request is being made to /users');
@@ -110,36 +111,41 @@ router.post('/login', async (req, res, next) => {
 });
 
 // GET /api/users/me
-router.get('/me', async (req, res, next) => {
-  const prefix = 'Bearer ';
-  const auth = req.header('Authorization');
-
-  if (!auth) {
-    next();
-  } else if (auth.startsWith(prefix)) {
-    const token = auth.slice(prefix.length);
-
-    try {
-      const { id } = jwt.verify(token, JWT_SECRET);
-      if (!id) {
-        next({
-          name: 'Invalid token',
-          message: 'This is an invalid token',
-        });
-      }
-      if (id) {
-        req.user = await getUserById(id);
-        res.send(req.user);
-      }
-    } catch ({ name, message }) {
-      next({ name, message });
-    }
-  } else {
-    next({
-      name: 'AuthorizationHeaderError',
-      message: `Authorization token must start with ${prefix}`,
-    });
+router.get('/me', requireUser,  async (req, res, next) => {
+  try{
+    res.send(req.user)
+  } catch (error){
+    next (error)
   }
+  // const prefix = 'Bearer ';
+  // const auth = req.header('Authorization');
+
+  // if (!auth) {
+  //   next();
+  // } else if (auth.startsWith(prefix)) {
+  //   const token = auth.slice(prefix.length);
+
+  //   try {
+  //     const { id } = jwt.verify(token, JWT_SECRET);
+  //     if (!id) {
+  //       next({
+  //         name: 'Invalid token',
+  //         message: 'This is an invalid token',
+  //       });
+  //     }
+  //     if (id) {
+  //       req.user = await getUserById(id);
+  //       res.send(req.user);
+  //     }
+  //   } catch ({ name, message }) {
+  //     next({ name, message });
+  //   }
+  // } else {
+  //   next({
+  //     name: 'AuthorizationHeaderError',
+  //     message: `Authorization token must start with ${prefix}`,
+  //   });
+  // }
 });
 
 // GET /api/users/:username/routines
@@ -148,25 +154,18 @@ router.get(`/:username/routines`, async (req, res, next) => {
   try {
     const { username } = req.params;
     const user = await getUserByUsername(username);
-
-    console.log('req.user:', '...........', req.body);
-    console.log('user:', '****', user);
     if (!user) {
       next({
         name: 'User does not exist in the database',
         message: 'User does not exist in the database',
       });
     }
-
-    const routines = await getAllRoutinesByUser({ username });
-    res.send(routines);
-    if (req.body.username === user.username) {
+    if (req.user && user.id === req.user.id) {
       const publicRoutines = await getPublicRoutinesByUser({ username });
       res.send(publicRoutines);
-    } else {
+    }
       const routines = await getAllRoutinesByUser({ username });
       res.send(routines);
-    }
   } catch (error) {
     next(error);
   }
