@@ -7,14 +7,16 @@ const {
   getActivityById,
   updateActivity,
 } = require('../db/activities');
+const {
+  getPublicRoutinesByActivity
+} = require('../db/routines');
 const { requireUser } = require("./utils");
-// GET /api/activities/:activityId/routines
+
 
 // GET /api/activities
 router.get('/', async (req, res, next) => {
   try {
     const activities = await getAllActivities();
-    console.log(activities);
     if (activities) {
       res.send(activities);
     }
@@ -55,7 +57,6 @@ router.patch('/:activityId', async (req, res, next) => {
   const { name, description } = req.body;
   try {
     const activity = await getActivityById(id);
-
     if (!activity) {
       next({
         name: 'ActivityExistsError',
@@ -64,7 +65,6 @@ router.patch('/:activityId', async (req, res, next) => {
       });
       return;
     }
-
     const activityName = await getActivityByName(name);
     if (activityName){
       next ({
@@ -74,16 +74,36 @@ router.patch('/:activityId', async (req, res, next) => {
       })
     }
     const patchActivity = await updateActivity({ id, name, description });
-
     if (patchActivity) {
       res.send(patchActivity);
     }
-
-    console.log('updateActivity::::::', patchActivity);
   } catch ({ name, message }) {
     next({ name, message });
   }
 });
+// GET /api/activities/:activityId/routines
+router.get('/:activityId/routines', async (req, res, next) => {
+  const id = req.params.activityId;
+  
+  try {
+    const routines = await getPublicRoutinesByActivity({id});
+    const activity = await getActivityById(id);
+    
+    if(true){
+      next({
+        name: "RoutineDoesNotExist",
+        message: `Activity ${id} not found`,
+        error: "This routine doesn't exist"
+      })
+    }
+    res.send(routines)
+
+  } catch ({ name, message }){
+    next ({ name, message })
+  }
+
+
+})
 
 
 module.exports = router;
