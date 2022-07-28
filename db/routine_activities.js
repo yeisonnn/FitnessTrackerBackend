@@ -1,7 +1,6 @@
 /* eslint-disable no-useless-catch */
 const client = require('./client');
 
-
 async function addActivityToRoutine({
   routineId,
   activityId,
@@ -45,14 +44,16 @@ async function getRoutineActivityById(id) {
 
 async function getRoutineActivitiesByRoutine({ id }) {
   try {
-    const { rows } = await client.query(
+    const {
+      rows: [routineActivity],
+    } = await client.query(
       `
       SELECT *
       FROM routine_activities
       WHERE "routineId" = ${id}
       ;`
     );
-    return rows;
+    return routineActivity;
   } catch (error) {
     throw error;
   }
@@ -89,7 +90,8 @@ async function destroyRoutineActivity(id) {
       DELETE FROM routine_activities
       WHERE id = $1
       RETURNING *
-      ;`,[id]
+      ;`,
+      [id]
     );
     return routineActivity;
   } catch (error) {
@@ -98,8 +100,7 @@ async function destroyRoutineActivity(id) {
 }
 
 async function canEditRoutineActivity(routineActivityId, userId) {
-  
-    try {
+  try {
     const {
       rows: [routineActivity],
     } = await client.query(

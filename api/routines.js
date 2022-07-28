@@ -7,6 +7,10 @@ const {
   getRoutineById,
   destroyRoutine,
 } = require('../db/routines');
+const {
+  addActivityToRoutine,
+  getRoutineActivitiesByRoutine,
+} = require('../db/routine_activities');
 const { getUserById } = require('../db/users');
 const { UserDoesNotExistError } = require('../errors');
 const { requireUser } = require('./utils');
@@ -40,25 +44,30 @@ router.post('/', requireUser, async (req, res, next) => {
 
 // PATCH /api/routines/:routineId
 router.patch('/:routineId', requireUser, async (req, res, next) => {
-  const {isPublic, name, goal } = req.body;
+  const { isPublic, name, goal } = req.body;
   const routine = await getRoutineById(req.params.routineId);
   const { creatorId } = routine.creatorId;
-  const id = routine.id
-  const username = req.user.username
+  const id = routine.id;
+  const username = req.user.username;
 
   try {
-    
     if (routine.creatorId != req.user.id) {
-        res.status(403)
-          next({
-          name: "You are not the Owner",
-          message: `User ${username} is not allowed to update ${routine.name}`,
-          error: "There was an error",
-        })
-    } 
-    const patchRoutine = await updateRoutine({id, creatorId, isPublic, name, goal});
-    
-    res.send(patchRoutine)
+      res.status(403);
+      next({
+        name: 'You are not the Owner',
+        message: `User ${username} is not allowed to update ${routine.name}`,
+        error: 'There was an error',
+      });
+    }
+    const patchRoutine = await updateRoutine({
+      id,
+      creatorId,
+      isPublic,
+      name,
+      goal,
+    });
+
+    res.send(patchRoutine);
   } catch ({ name, message }) {
     next({ name, message });
   }
@@ -76,33 +85,47 @@ router.get('/:routineId', async (req, res, next) => {
 });
 
 // DELETE /api/routines/:routineId
-router.delete('/:routineId', requireUser, async (req, res, next)=> {
+router.delete('/:routineId', requireUser, async (req, res, next) => {
   const routine = await getRoutineById(req.params.routineId);
   const id = routine.id;
-  const username = req.user.username
+  const username = req.user.username;
 
   try {
-
-    if (routine.creatorId != req.user.id){
-      res.status(403)
-          next({
-          name: "You are not the Owner",
-          message: `User ${username} is not allowed to delete ${routine.name}`,
-          error: "There was an error",
-        })
+    if (routine.creatorId != req.user.id) {
+      res.status(403);
+      next({
+        name: 'You are not the Owner',
+        message: `User ${username} is not allowed to delete ${routine.name}`,
+        error: 'There was an error',
+      });
     }
-    if (id){
-      const removeRoutine = await destroyRoutine(id)
-      res.send(routine)
+    if (id) {
+      const removeRoutine = await destroyRoutine(id);
+      res.send(routine);
     }
-
   } catch ({ name, message }) {
     next({ name, message });
   }
 });
 // POST /api/routines/:routineId/activities
-router.post('/:routineId/activities', requireUser, async (req, res, next)=> {
+router.post('/:routineId/activities', requireUser, async (req, res, next) => {
+  try {
+    const { count, duration } = await req.body;
+    const id = req.params.routineId;
+    const routineActivity = await getRoutineActivitiesByRoutine({ id });
+    const activityId = routineActivity.activityId;
+    const routineId = routineActivity.routineId;
+    console.log(activityId, 'activityId');
+    console.log(routineId, 'routineid');
+    console.log(count);
+    console.log(duration);
 
-})
+    const add = await addActivityToRoutine(1, 2, 333, 44555);
+
+    console.log(add, 'RRRRRRRRRRRRRRR');
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
 
 module.exports = router;
