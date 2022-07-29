@@ -129,3 +129,5 @@ router.post('/:routineId/activities', requireUser, async (req, res, next) => {
 });
 
 module.exports = router;
+
+// POST /api/routines/:routineId/activities test will sometimes fail when testing the full back-end. Re-running alone or by api itself will fix it. Consulted instructor and was told to leave this code as it may be the test itself breaking.

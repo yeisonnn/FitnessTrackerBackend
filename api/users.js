@@ -131,3 +131,5 @@ router.get("/:username/routines", async (req, res, next) => {
 });
 
 module.exports = router;
+
+// GET /api/users/:username/routines test will sometimes fail when testing the full back-end. Re-running alone or by api itself will fix it. Consulted instructor and was told to leave this code as it may be the test itself breaking.
