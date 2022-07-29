@@ -31,6 +31,15 @@ const {
   updateActivity,
 } = require('./activities');
 
+const {
+  getRoutineActivityById,
+  addActivityToRoutine,
+  getRoutineActivitiesByRoutine,
+  updateRoutineActivity,
+  destroyRoutineActivity,
+  canEditRoutineActivity,
+} = require('./routine_activities')
+
 async function dropTables() {
   console.log('Dropping All Tables...');
   // drop all tables, in the correct order
