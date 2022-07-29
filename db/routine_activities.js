@@ -45,7 +45,7 @@ async function getRoutineActivityById(id) {
 async function getRoutineActivitiesByRoutine({ id }) {
   try {
     const {
-      rows: [routineActivity],
+      rows
     } = await client.query(
       `
       SELECT *
@@ -53,7 +53,7 @@ async function getRoutineActivitiesByRoutine({ id }) {
       WHERE "routineId" = ${id}
       ;`
     );
-    return routineActivity;
+    return rows;
   } catch (error) {
     throw error;
   }

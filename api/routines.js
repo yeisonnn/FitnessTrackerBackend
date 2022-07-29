@@ -10,9 +10,10 @@ const {
 const {
   addActivityToRoutine,
   getRoutineActivitiesByRoutine,
+  getRoutineActivityById,
 } = require('../db/routine_activities');
 const { getUserById } = require('../db/users');
-const { UserDoesNotExistError } = require('../errors');
+const { UserDoesNotExistError, ActivityExistsError } = require('../errors');
 const { requireUser } = require('./utils');
 
 // GET /api/routines
@@ -109,20 +110,19 @@ router.delete('/:routineId', requireUser, async (req, res, next) => {
 });
 // POST /api/routines/:routineId/activities
 router.post('/:routineId/activities', requireUser, async (req, res, next) => {
+  const { activityId, count, duration } = req.body;
+  const routineId = req.params.routineId
+  const testActivityId = await getRoutineActivityById(activityId)
   try {
-    const { count, duration } = await req.body;
-    const id = req.params.routineId;
-    const routineActivity = await getRoutineActivitiesByRoutine({ id });
-    const activityId = routineActivity.activityId;
-    const routineId = routineActivity.routineId;
-    console.log(activityId, 'activityId');
-    console.log(routineId, 'routineid');
-    console.log(count);
-    console.log(duration);
-
-    const add = await addActivityToRoutine(1, 2, 333, 44555);
-
-    console.log(add, 'RRRRRRRRRRRRRRR');
+    if (testActivityId){
+      next({
+        name: "Duplicate ActivityId",
+        message: `Activity ID ${activityId} already exists in Routine ID ${routineId}`
+      })
+    } else {
+      const attachedRoutine = await addActivityToRoutine({routineId, activityId, duration, count})
+      res.send (attachedRoutine)
+    }
   } catch ({ name, message }) {
     next({ name, message });
   }
