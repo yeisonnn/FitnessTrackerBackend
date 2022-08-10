@@ -53,6 +53,7 @@ async function getUserById(userId) {
     FROM users
     WHERE id=$1;
   `,
+  
       [userId]
     );
     return user;
